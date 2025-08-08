@@ -1,27 +1,40 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import  React ,{ useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Sidebar from '@/components/sidebar/sidebar';
+import TaskList from '@/components/tasks/taskList';
+
 
 export default function Dashboard() {
   const router = useRouter();
   const [loading, setLoading] = useState(true); // prevent showing dashboard too early
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [token, setToken] = useState<string | null>(null);
+
+   const handleSidebarClose = () => {
+    setIsSidebarOpen(false);
+  };
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    
+    const storedToken = localStorage.getItem("token");
+console.log("Token in localStorage:", storedToken);
 
     // If no token, redirect immediately
-    if (!token) {
+    if (!storedToken) {
       router.push("/");
       return;
     }
+
+
 
     const verifyToken = async () => {
       try {
         const response = await fetch("http://localhost:5167/api/auth/protected-route", {
           method: "GET",
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${storedToken}`,
           },
         });
 
@@ -31,6 +44,7 @@ export default function Dashboard() {
           localStorage.removeItem("token");
           router.push("/");
         } else {
+          setToken(storedToken);
           setLoading(false); // Only show page if token is valid
         }
       } catch (error) {
@@ -46,5 +60,20 @@ export default function Dashboard() {
     return <div>Checking authentication...</div>;
   }
 
-  return <div>Hello, welcome to your dashboard!</div>;
+  return (
+   
+    <div className="flex h-screen bg-gray-50">
+      <Sidebar isOpen={isSidebarOpen} onClose={handleSidebarClose} token={token}  />
+      {token && <TaskList token={token} />}
+    </div>
+    
+  );
 }
+
+
+
+
+
+
+
+

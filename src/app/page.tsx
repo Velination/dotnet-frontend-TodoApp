@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
+
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(false);
    const [formData, setFormData] = useState({ fullname: '', email: '', password: '', confirmPassword: '' });
@@ -25,12 +26,12 @@ export default function AuthPage() {
      setError("");
 
  if (!formData.fullname || !formData.email || !formData.password || !formData.confirmPassword) {
-    setMessage('❌ All fields are required');
+    setMessage(' All fields are required');
     return;
   }
 
   if (formData.password !== formData.confirmPassword) {
-    setMessage('❌ Passwords do not match.');
+    setMessage(' Passwords do not match.');
     return;
   }
 
@@ -59,7 +60,7 @@ export default function AuthPage() {
       }, 2000);
 
     } catch (error: any) {
-      setMessage(`❌ ${error.message}`);
+      setMessage(` ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -102,6 +103,7 @@ export default function AuthPage() {
 
 
   return (
+   
    <div className="w-full h-screen flex items-center justify-center bg-gray-100 overflow-hidden relative">
      <div className="relative w-full max-w-5xl h-[600px] rounded-lg shadow-lg overflow-hidden flex transition-all duration-700 ease-in-out">
         {!isLogin ? (
@@ -290,6 +292,7 @@ export default function AuthPage() {
         )}
       </div>
     </div>
+    
   );
 }
 
