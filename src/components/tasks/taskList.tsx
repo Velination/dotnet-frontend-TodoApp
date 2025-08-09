@@ -15,7 +15,12 @@ interface Task {
   isCompleted: boolean;
 }
 
-const TaskList: React.FC<{ token : string }> = ({ token }) => {
+interface TaskListProps {
+  token: string;
+  refreshTrigger?: boolean; // optional prop that triggers refetch when toggled
+}
+
+const TaskList: React.FC<TaskListProps> = ({ token, refreshTrigger }) => {
    const [showModal, setShowModal] = useState(false);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
@@ -27,7 +32,7 @@ const TaskList: React.FC<{ token : string }> = ({ token }) => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetch("http://localhost:5167/api/Auth/me", {
+        const res = await fetch("https://dotnet-backend-todoapp.onrender.com/api/Auth/me", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -53,7 +58,7 @@ const TaskList: React.FC<{ token : string }> = ({ token }) => {
    const fetchTasks = async () => {
       try {
          console.log("Token used for fetch:", token);
-        const res = await fetch("http://localhost:5167/api/Todo/all", {
+        const res = await fetch("https://dotnet-backend-todoapp.onrender.com/api/Todo/all", {
           headers: {
             "content-Type": "application/json",
             Authorization: `Bearer ${token}`,
@@ -79,7 +84,7 @@ const TaskList: React.FC<{ token : string }> = ({ token }) => {
     if (token) {
       fetchTasks();
     }
-  }, [token]);
+  }, [token, refreshTrigger]);
 
 
     const handleSave = () => {

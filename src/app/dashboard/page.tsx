@@ -11,10 +11,13 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true); // prevent showing dashboard too early
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [token, setToken] = useState<string | null>(null);
+   const [refreshTasks, setRefreshTasks] = useState(false);
 
    const handleSidebarClose = () => {
     setIsSidebarOpen(false);
   };
+
+   const triggerTaskRefresh = () => setRefreshTasks(prev => !prev);
 
   useEffect(() => {
     
@@ -31,7 +34,7 @@ console.log("Token in localStorage:", storedToken);
 
     const verifyToken = async () => {
       try {
-        const response = await fetch("http://localhost:5167/api/auth/protected-route", {
+        const response = await fetch("https://dotnet-backend-todoapp.onrender.com/api/auth/protected-route", {
           method: "GET",
           headers: {
             Authorization: `Bearer ${storedToken}`,
@@ -63,8 +66,8 @@ console.log("Token in localStorage:", storedToken);
   return (
    
     <div className="flex h-screen bg-gray-50">
-      <Sidebar isOpen={isSidebarOpen} onClose={handleSidebarClose} token={token}  />
-      {token && <TaskList token={token} />}
+      <Sidebar isOpen={isSidebarOpen} onClose={handleSidebarClose} token={token} onTaskAdded={triggerTaskRefresh} />
+      {token && <TaskList token={token} refreshTrigger={refreshTasks} />}
     </div>
     
   );

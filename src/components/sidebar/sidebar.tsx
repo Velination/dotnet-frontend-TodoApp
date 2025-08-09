@@ -9,10 +9,10 @@ interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
   token: string | null;
-  
+  onTaskAdded?: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, token,  }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, token, onTaskAdded  }) => {
      const [loading, setLoading] = useState(false);
      const [showModal, setShowModal] = useState(false);
   const [title, setTitle] = useState('');
@@ -22,7 +22,7 @@ const [userName, setUserName] = useState("");
 useEffect(() => {
   const fetchUser = async () => {
     try {
-      const res = await fetch("http://localhost:5167/api/Auth/me", {
+      const res = await fetch("https://dotnet-backend-todoapp.onrender.com/api/Auth/me", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -56,7 +56,7 @@ useEffect(() => {
   }
 
   try {
-    const response = await fetch("http://localhost:5167/api/Todo/add", {
+    const response = await fetch("https://dotnet-backend-todoapp.onrender.com/api/Todo/add", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -78,6 +78,9 @@ useEffect(() => {
     setShowModal(false);
     setTitle("");
     setDescription("");
+      if (onTaskAdded) {
+      onTaskAdded();
+    }
   } catch (err) {
     console.error("Error adding task:", err);
   } finally {
@@ -127,13 +130,9 @@ const handleLogout = () => {
 
     <hr className="border-t border-white mb-6" />
 
-    {/* <input
-      type="text"
-      placeholder="Search"
-      className="w-full  border border-b border-white bg-white outline-none focus:outline-non   rounded mb-4 text-sm"
-    /> */}
+   
     <div className="relative w-full max-w-xs mb-4 ">
-      <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-gray-300" />
+      <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 " />
       <input
         type="text"
         placeholder="Search..."

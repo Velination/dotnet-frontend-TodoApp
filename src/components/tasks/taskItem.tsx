@@ -35,7 +35,7 @@ const [updatedIsCompleted, setUpdatedIsCompleted] = useState(false);
 
     const updateTask = async () => {
   try {
-    const res = await fetch(`http://localhost:5167/api/Todo/update/${id}`, {
+    const res = await fetch(`https://dotnet-backend-todoapp.onrender.com/api/Todo/update/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -63,7 +63,7 @@ const [updatedIsCompleted, setUpdatedIsCompleted] = useState(false);
 
    const deleteTask = async () => {
     try {
-      const res = await fetch(`http://localhost:5167/api/Todo/delete/${id}`, {
+      const res = await fetch(`https://dotnet-backend-todoapp.onrender.com/api/Todo/delete/${id}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`, // Adjust based on your setup
