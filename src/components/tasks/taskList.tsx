@@ -1,12 +1,10 @@
 // File: /components/TaskList/TaskList.tsx
 
-"use client"
-import React, { useEffect, useState } from 'react';
-import TaskItem from './taskItem';
+"use client";
+import React, { useEffect, useState, useCallback } from "react";
+import TaskItem from "./taskItem";
 import { FaHome } from "react-icons/fa";
-import Image from 'next/image';
-
-
+import Image from "next/image";
 
 interface Task {
   id: number;
@@ -17,202 +15,199 @@ interface Task {
 
 interface TaskListProps {
   token: string;
-  refreshTrigger?: boolean; // optional prop that triggers refetch when toggled
+  refreshTrigger?: boolean;
 }
 
 const TaskList: React.FC<TaskListProps> = ({ token, refreshTrigger }) => {
-   const [showModal, setShowModal] = useState(false);
-    const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
-     const [tasks, setTasks] = useState<Task[]>([]);
+  const [showModal, setShowModal] = useState(false);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState("");
-  
-  
+
+  // Fetch user info
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetch("https://dotnet-backend-todoapp.onrender.com/api/Auth/me", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-  
+        const res = await fetch(
+          "https://dotnet-backend-todoapp.onrender.com/api/Auth/me",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
         if (!res.ok) {
           throw new Error("Failed to fetch user info");
         }
-  
-        const data = await res.json();
-        console.log('Fetched user:', data);
+
+        const data: { name: string } = await res.json();
+        console.log("Fetched user:", data);
         setUserName(data.name);
       } catch (err) {
-        console.error("Error fetching user", err);
+        if (err instanceof Error) {
+          console.error("Error fetching user:", err.message);
+        }
       }
     };
-  
+
     if (token) {
       fetchUser();
     }
   }, [token]);
-  
-   const fetchTasks = async () => {
-      try {
-         console.log("Token used for fetch:", token);
-        const res = await fetch("https://dotnet-backend-todoapp.onrender.com/api/Todo/all", {
+
+  // Fetch tasks
+  const fetchTasks = useCallback(async () => {
+    try {
+      console.log("Token used for fetch:", token);
+      const res = await fetch(
+        "https://dotnet-backend-todoapp.onrender.com/api/Todo/all",
+        {
           headers: {
-            "content-Type": "application/json",
+            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        });
-
-        if (!res.ok) {
-          throw new Error("Failed to fetch tasks");
         }
+      );
 
-        const data = await res.json();
-        setTasks(data);
-      } catch (error) {
-        console.error("Error fetching tasks:", error);
-      } finally {
-        setLoading(false);
+      if (!res.ok) {
+        throw new Error("Failed to fetch tasks");
       }
-    };
-  
-  useEffect(() => {
-   
 
+      const data: Task[] = await res.json();
+      setTasks(data);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error("Error fetching tasks:", error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
+
+  useEffect(() => {
     if (token) {
       fetchTasks();
     }
-  }, [token, refreshTrigger]);
+  }, [token, refreshTrigger, fetchTasks]);
 
+  // Add task
+  const handleSave = async () => {
+    if (!title || !description) return;
 
-    const handleSave = async () => {
-  if (!title || !description) return;
-
-  if (!token) {
-    console.error("No token found");
-    return;
-  }
-
-  try {
-    const response = await fetch("https://dotnet-backend-todoapp.onrender.com/api/Todo/add", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ title, description }),
-    });
-
-    if (!response.ok) {
-      console.log(await response.text()); // helpful for debugging
-      throw new Error("Failed to create task");
+    if (!token) {
+      console.error("No token found");
+      return;
     }
 
-    const data = await response.json();
-    console.log("Task added:", data);
-    alert("Task created successfully!");
+    try {
+      setLoading(true);
+      const response = await fetch(
+        "https://dotnet-backend-todoapp.onrender.com/api/Todo/add",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ title, description }),
+        }
+      );
 
-    await fetchTasks();
+      if (!response.ok) {
+        console.log(await response.text());
+        throw new Error("Failed to create task");
+      }
 
-    setShowModal(false);
-    setTitle("");
-    setDescription("");
-  } catch (err) {
-    console.error("Error adding task:", err);
-  } finally {
-    setLoading(false);
-  }
-};
+      const data = await response.json();
+      console.log("Task added:", data);
+      alert("Task created successfully!");
 
+      await fetchTasks();
 
-    const handleLogout = () => {
-  localStorage.removeItem("token");
-  window.location.href = "/";
-};
+      setShowModal(false);
+      setTitle("");
+      setDescription("");
+    } catch (err) {
+      if (err instanceof Error) {
+        console.error("Error adding task:", err.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    window.location.href = "/";
+  };
 
-
-   
+  
 
   return (
     <div className="flex-1 p-6 overflow-y-auto bg-white">
-      
-    {/* Mobile-only buttons at the top */}
- <div className='mb-1 md:hidden flex items-center gap-2'>
-  <Image 
-    src="/profile.PNG"
-    alt=""
-    width={30}
-    height={30}
-  />
-  <h2 className="text-xl  text-gray-500 font-semibold">
-    Hello, {userName || 'User'}
-  </h2>
-</div>
+      {/* Mobile-only header */}
+      <div className="mb-1 md:hidden flex items-center gap-2">
+        <Image src="/profile.PNG" alt="" width={30} height={30} />
+        <h2 className="text-xl text-gray-500 font-semibold">
+          Hello, {userName || "User"}
+        </h2>
+      </div>
 
-  <hr className="border-t md:hidden border-gray-100 my-4" />
+      <hr className="border-t md:hidden border-gray-100 my-4" />
 
+      <div className="md:hidden flex items-center justify-between gap-2">
+        <button
+          onClick={() => setShowModal(true)}
+          className="bg-gray-500 py-2 px-3 rounded-sm hover:bg-gray-400 text-white text-sm"
+        >
+          + Add Task
+        </button>
 
-<div className=" md:hidden flex items-center justify-between gap-2">
-   
+        <div className="flex items-center gap-2 md:hidden">
+          <FaHome size={24} className="text-gray-500" />
+          <h2 className="text-xl text-gray-500 font-semibold">Tasks</h2>
+        </div>
 
-  <button 
-   onClick={() => setShowModal(true)}
-  className="bg-gray-500 py-2 px-3 rounded-sm hover:bg-gray-400 text-white text-sm">
-    + Add Task
-  </button>
+        <button
+          onClick={handleLogout}
+          className="bg-red-600 py-2 px-3 rounded-sm hover:bg-red-500 text-white text-sm"
+        >
+          Log Out
+        </button>
+      </div>
 
-  <div className="flex items-center gap-2 md:hidden">
-  <FaHome size={24} className="text-gray-500" />
-  <h2 className="text-xl text-gray-500 font-semibold">Tasks</h2>
-</div>
-
-  <button 
-  onClick={handleLogout}
-  className="bg-red-600 py-2 px-3 rounded-sm hover:bg-red-500 text-white text-sm">
-    Log Out
-  </button>
-</div>
-
-
-<div className="hidden md:flex items-center gap-2">
-  <FaHome size={24} className="text-gray-500" />
-  <h2 className="text-xl text-gray-500 font-semibold">Tasks</h2>
-</div>
-
-
-
-      
+      <div className="hidden md:flex items-center gap-2">
+        <FaHome size={24} className="text-gray-500" />
+        <h2 className="text-xl text-gray-500 font-semibold">Tasks</h2>
+      </div>
 
       <hr className="border-t border-gray-300 my-4" />
 
-
-      
-      {/* <AddTaskInput /> */}
+      {/* Tasks */}
       <div className="mt-4 space-y-2">
         {tasks.length > 0 ? (
           tasks.map((task) => (
-           <TaskItem
-  key={task.id}
-  id={task.id} 
-  title={task.title}
-  description={task.description}
-  isCompleted={task.isCompleted}
-  onDelete={fetchTasks}
-  onUpdate={fetchTasks}
-/>
+            <TaskItem
+              key={task.id}
+              id={task.id}
+              title={task.title}
+              description={task.description}
+              isCompleted={task.isCompleted}
+              onDelete={fetchTasks}
+              onUpdate={fetchTasks}
+            />
           ))
         ) : (
-          <p className='text-gray-500'>No tasks found. </p>
-        )
-      }
+          <p className="text-gray-500">No tasks found.</p>
+        )}
       </div>
 
-       {/* Modal */}
+      {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-transparent  backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-transparent backdrop-blur-sm">
           <div className="bg-gray-300 p-6 rounded-lg w-[90%] max-w-md">
             <h2 className="text-xl font-semibold mb-4">Add New Task</h2>
 
@@ -248,7 +243,6 @@ const TaskList: React.FC<TaskListProps> = ({ token, refreshTrigger }) => {
           </div>
         </div>
       )}
-
     </div>
   );
 };
