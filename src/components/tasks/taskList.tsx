@@ -87,13 +87,44 @@ const TaskList: React.FC<TaskListProps> = ({ token, refreshTrigger }) => {
   }, [token, refreshTrigger]);
 
 
-    const handleSave = () => {
-      console.log("Title:", title);
-      console.log("Description:", description);
-      setShowModal(false);
-      setTitle('');
-      setDescription('');
-    };
+    const handleSave = async () => {
+  if (!title || !description) return;
+
+  if (!token) {
+    console.error("No token found");
+    return;
+  }
+
+  try {
+    const response = await fetch("https://dotnet-backend-todoapp.onrender.com/api/Todo/add", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ title, description }),
+    });
+
+    if (!response.ok) {
+      console.log(await response.text()); // helpful for debugging
+      throw new Error("Failed to create task");
+    }
+
+    const data = await response.json();
+    console.log("Task added:", data);
+    alert("Task created successfully!");
+
+    await fetchTasks();
+
+    setShowModal(false);
+    setTitle("");
+    setDescription("");
+  } catch (err) {
+    console.error("Error adding task:", err);
+  } finally {
+    setLoading(false);
+  }
+};
 
 
     const handleLogout = () => {

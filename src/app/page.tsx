@@ -111,15 +111,12 @@ export default function AuthPage() {
        {/* Left Side with Image */}
     <div className="w-1/2 h-full relative hidden md:block ">
       <Image
-        src="" // Replace with your actual image path
+        src="/login.PNG" 
         alt="Signup"
         fill
         className="object-cover"
         priority
       />
-      <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-40 flex items-center justify-center text-white text-3xl font-bold">
-        Welcome Back!
-      </div>
     </div>
 
     {/* Right Side with Centered Form */}
@@ -200,7 +197,7 @@ export default function AuthPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700"
+            className="w-full bg-red-500 text-white py-2 rounded-md hover:bg-red-700"
           >
             {loading ? 'Creating Account...' : 'Create Account'}
           </button>
@@ -212,7 +209,7 @@ export default function AuthPage() {
           )}
         <p className="text-center text-sm text-gray-600 mt-4">
           Already have an account?{' '}
-         <button onClick={() => setIsLogin(true)} className="underline">Login</button> 
+         <button onClick={() => setIsLogin(true)} className="hover:bg-red-500 hover:text-white hover:p-1 hover:rounded-sm">Login</button> 
         </p>
       </div>
     </div>
@@ -265,7 +262,7 @@ export default function AuthPage() {
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700"
+            className="w-full bg-green-800 text-white py-2 rounded-md hover:bg-green-500"
              disabled={loading}
           >
             {loading ? "Logging in..." : "Login"}
@@ -273,17 +270,18 @@ export default function AuthPage() {
         </form>
         <p className="mt-6 text-sm">
                 Dont have an account?{' '}
-                <button onClick={() => setIsLogin(false)} className="underline">Sign Up</button>
+                <button onClick={() => setIsLogin(false)}  className=" hover:bg-green-800 hover:text-white hover:p-1 hover:rounded-sm">Sign Up</button>
               </p>
       </div>
     </div>
 
             {/* Right Side (White) with Image */}
-            <div className="w-1/2 bg-black  items-center justify-center hidden md:block">
+            <div className="w-1/2  items-center justify-center hidden md:block">
               <Image
-                src=""
+                
+                src="/sign-up.PNG" 
                 alt="Login Illustration"
-                width={350}
+                width={510}
                 height={400}
                 className="object-cover"
               />
